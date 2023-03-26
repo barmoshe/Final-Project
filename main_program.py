@@ -44,6 +44,7 @@ isOn = False
 current_selection = None
 count1 = 0
 test_df = pd.read_csv(test_csv_path)
+sentence = ''
 
 
 async def predictImg(roi, test_mode=False):
@@ -115,3 +116,121 @@ async def predictImg(roi, test_mode=False):
                 # We set the 'state' attribute of the 'textForm' object to 'DISABLED'.
                 # This prevents the user from modifying the contents of the text box.
                 textForm.config(state=DISABLED)
+
+
+class App:
+    global sentence
+
+    def __init__(self, window, window_title, video_source=0):
+        global textForm, text_file_num, sample_rate, test_df
+        text_file_num = 1
+        sample_rate = default_sample_rate
+        window.resizable(False, False)
+        self.window = window
+        self.window.title(window_title)
+        self.video_source = video_source
+        # open video source (by default this will try to open the computer webcam)
+        self.vid = VideoFrame(self.video_source)
+        # Create a canvas that can fit the above video source size
+        self.canvas = tkinter.Canvas(window, width=800, height=800)
+        self.canvas.pack()
+        # adding text promt and entry box
+        self.txt_label = tkinter.Label(window, text="The translated text :")
+        self.txt_label.place(x=50, y=490)
+        self.txt_box = tkinter.Entry(
+            window, justify=RIGHT, font=("Arial", 20, "bold"))
+        self.txt_box.place(x=180, y=490, height=90, width=350)
+        self.txt_box.configure(width=334)
+        textForm = self.txt_box
+        textForm.config(state=DISABLED)
+
+        # adding buttons
+        image = Image.open("icons/save.png")
+        img = ImageTk.PhotoImage(image)
+        self.save_but = tkinter.Button(window, text="save text", width=50, height=50, image=img,
+                                       command=self.click_on_save)
+        self.save_but.place(x=555, y=510)
+        del_img = Image.open("icons/delete.png")
+        del_img = del_img.resize((20, 20), Image.LANCZOS)
+        img_del = ImageTk.PhotoImage(del_img)
+
+        self.clear_but = tkinter.Button(
+            window, image=img_del, command=self.clear_txt_box)
+        self.clear_but.place(x=155, y=556)
+        self.clean_label = tkinter.Label(window, text="Clear text")
+        self.clean_label.place(x=145, y=580)
+
+        self.save_label = tkinter.Label(window, text="Save Text")
+        self.save_label.place(x=550, y=570)
+
+        # Bind all keyboard pressed to keyPressed function.
+        window.bind('<KeyPress>', self.keyPressed)
+
+        # After it is called once, the update method will be automatically called every delay milliseconds
+        self.delay = 1
+        self.update()
+        self.window.mainloop()
+
+    def click_on_save(self):
+        global textForm, text_file_num
+        f = filedialog.asksaveasfile(mode='w', defaultextension=".txt")
+        if f is None:  # asksaveasfile return `None` if dialog closed with "cancel".
+            return
+        data = textForm.get()
+        data.encode(encoding="UTF-8", errors='strict')
+        f.write(data)
+        f.close()
+
+    def clear_txt_box(self):
+        global textForm
+        textForm.config(state=NORMAL)
+        textForm.delete(0, END)
+        textForm.config(state=DISABLED)
+        sentence = ''
+
+    def exit_prog(self):
+        self.window.destroy()
+
+    #run the update method every frame
+    def update(self):
+        # Get a frame from the video source
+        ret, frame = self.vid.get_frame()
+
+        if ret:
+            self.photo = ImageTk.PhotoImage(image=Image.fromarray(frame))
+            self.canvas.create_image(0, 0, image=self.photo, anchor=tkinter.NW)
+
+        self.window.after(self.delay, self.update)
+    
+    def keyPressed(self, event):
+        global test_df
+        print(event.keycode)
+        if event.keycode == 889192475:  # Escape
+            self.window.destroy()
+        elif event.keycode == 2063660802:  # Left
+            self.vid.x0 = max((self.vid.x0 - 5, 0))
+        elif event.keycode == 2113992448:  # Up
+            self.viﬁﬁd.y0 = max((self.vid.y0 - 5, 0))
+        elif event.keycode == 2080438019:  # Right
+            self.vid.x0 = min(
+                (self.vid.x0 + 5, self.vid.frame.shape[1] - self.vid.predWidth))
+        elif event.keycode == 2097215233:  # Down
+            self.vid.y0 = min(
+                (self.vid.y0 + 5, self.vid.frame.shape[0] - self.vid.predWidth))
+        elif event.keycode == 771752045:  # 'M' - Binary Mask
+            self.vid.showMask = not self.vid.showMask
+        elif event.keycode == 587202672:  # 'P' - Prediction
+            self.vid.predict = not self.vid.predict
+
+        elif event.keycode == 285212788:  # t - TestMode
+            if self.vid.testMode:
+                self.vid.testMode = False
+                test_df.to_csv('test.csv', index=False)
+                self.vid.predict = False
+                print_csv_to_console()
+            else:
+                self.vid.testMode = True
+                self.vid.predict = True
+                test_df = pd.read_csv(test_csv_path)
+
+
