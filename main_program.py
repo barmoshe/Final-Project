@@ -191,7 +191,7 @@ class App:
     def exit_prog(self):
         self.window.destroy()
 
-    #run the update method every frame
+    # run the update method every frame
     def update(self):
         # Get a frame from the video source
         ret, frame = self.vid.get_frame()
@@ -201,28 +201,29 @@ class App:
             self.canvas.create_image(0, 0, image=self.photo, anchor=tkinter.NW)
 
         self.window.after(self.delay, self.update)
-    
+
     def keyPressed(self, event):
         global test_df
         print(event.keycode)
-        if event.keycode == 889192475:  # Escape
+        if event.keycode == key_codes[('esc', platform.system())]:  # esc
             self.window.destroy()
-        elif event.keycode == 2063660802:  # Left
+        elif event.keycode == key_codes[('Left', platform.system())]:  # left
             self.vid.x0 = max((self.vid.x0 - 5, 0))
-        elif event.keycode == 2113992448:  # Up
-            self.viﬁﬁd.y0 = max((self.vid.y0 - 5, 0))
-        elif event.keycode == 2080438019:  # Right
+        elif event.keycode == key_codes[('Up', platform.system())]:  # up
+            self.vid.y0 = max((self.vid.y0 - 5, 0))
+        elif event.keycode == key_codes[('Right', platform.system())]:  # right
             self.vid.x0 = min(
                 (self.vid.x0 + 5, self.vid.frame.shape[1] - self.vid.predWidth))
-        elif event.keycode == 2097215233:  # Down
+        elif event.keycode == key_codes[('Down', platform.system())]:  # down
             self.vid.y0 = min(
                 (self.vid.y0 + 5, self.vid.frame.shape[0] - self.vid.predWidth))
-        elif event.keycode == 771752045:  # 'M' - Binary Mask
+        # 'M' - Binary Mask
+        elif event.keycode == key_codes[('m', platform.system())]:
             self.vid.showMask = not self.vid.showMask
-        elif event.keycode == 587202672:  # 'P' - Prediction
+        elif event.keycode == key_codes[('p', platform.system())]:  # 'P' - Predict
             self.vid.predict = not self.vid.predict
-
-        elif event.keycode == 285212788:  # t - TestMode
+        # 'T' - Test Mode
+        elif event.keycode == key_codes[('t', platform.system())]:
             if self.vid.testMode:
                 self.vid.testMode = False
                 test_df.to_csv('test.csv', index=False)
@@ -233,4 +234,4 @@ class App:
                 self.vid.predict = True
                 test_df = pd.read_csv(test_csv_path)
 
-
+App(Tk(), "Sign Language Letters Recognition")
