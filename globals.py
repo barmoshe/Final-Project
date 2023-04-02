@@ -1,5 +1,8 @@
-import platform
-platform = platform.system()
+import platform as plat
+import os
+from PIL import ImageFont
+
+platform = plat.system()
 # W = Space
 # X = Del
 # Y = None
@@ -17,7 +20,7 @@ hebrew_to_english = {
     'ג': 'C',
     'ד': 'D',
     'ה': 'E',
-    'ן': 'F',
+    'ו': 'F',
     'ז': 'G',
     'ח': 'H',
     'ט': 'I',
@@ -42,22 +45,25 @@ hebrew_to_english = {
 test_csv_path = 'test.csv'
 modelPath = 'Model/cnn12_model.h5'
 modelWeights = 'Model/trainWeights.h5'
-
+# Image Dimension
+imgDim = 128
 key_codes = {}
-key_codes[('t','Darwin')]=285212788
-key_codes[('t','Windows')]=84
-key_codes[('p','Darwin')]=587202672
-key_codes[('p','Windows')]=80
-key_codes[('m','Darwin')]=771752045
-key_codes[('m','Windows')]=77
-key_codes[('Esc','Darwin')]=889192475
-key_codes[('Esc','Windows')]=27
-key_codes[('Left','Darwin')]=2063660802
-key_codes[('Left','Windows')]=37
-key_codes[('Up','Darwin')]=2113992448
-key_codes[('Up','Windows')]=38
-key_codes[('Right','Darwin')]=2080438019
-key_codes[('Right','Windows')]=39
-key_codes[('Down','Darwin')]=2097215233
-key_codes[('Down','Windows')]=40
+key_codes[('t', 'Darwin')] = 285212788
+key_codes[('t', 'Windows')] = 84
+key_codes[('p', 'Darwin')] = 587202672
+key_codes[('p', 'Windows')] = 80
+key_codes[('m', 'Darwin')] = 771752045
+key_codes[('m', 'Windows')] = 77
+key_codes[('Esc', 'Darwin')] = 889192475
+key_codes[('Esc', 'Windows')] = 27
+key_codes[('Left', 'Darwin')] = 2063660802
+key_codes[('Left', 'Windows')] = 37
+key_codes[('Up', 'Darwin')] = 2113992448
+key_codes[('Up', 'Windows')] = 38
+key_codes[('Right', 'Darwin')] = 2080438019
+key_codes[('Right', 'Windows')] = 39
+key_codes[('Down', 'Darwin')] = 2097215233
+key_codes[('Down', 'Windows')] = 40
 
+
+font = ImageFont.truetype(font='fonts/arial.ttf', size=32)
