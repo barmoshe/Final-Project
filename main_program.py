@@ -281,7 +281,7 @@ class VideoFrame:
 
             # take data or apply predictions on ROI
             if self.predict:
-                loop = asyncio.get_event_loop()
+                loop = asyncio.get_event_loop() 
                 loop.run_until_complete(
                     predictImg(roi, test_mode=self.testMode))
 
