@@ -6,4 +6,4 @@ Model/cnn12_model.h5
 Model/trainWeights.h5
 __pycache__/utilities.cpython-311.pyc
 __pycache__/globals.cpython-311.pyc
-*.png
+
