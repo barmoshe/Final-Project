@@ -2,13 +2,14 @@ import platform as plat
 import os
 from PIL import ImageFont
 
+# Get the platform (Windows, Linux, Darwin, etc.)
 platform = plat.system()
-# W = Space
-# X = Del
-# Y = None
+
+# Define the classes (letters) used in the model
+# 'W' represents a space, 'X' represents a deletion, and 'Y' represents nothing
 classes = 'A B C D E F G H I J K L M N O P Q R S T U V W X Y'.split()
 
-# use this and not 'א'+index since includes finals.
+# Define the Hebrew alphabet (including spaces and final letters)
 alphaBet = "א ב ג ד ה ו ז ח ט י כ ל מ נ ס ע פ צ ק ר ש ת".split()
 alphaBet.append(' ')  # append space to be at the last index.
 # finals: ך ם ן ף ץ
@@ -42,11 +43,17 @@ hebrew_to_english = {
     'nothing': 'Y',
 }
 
+# Define the path to the test CSV file
 test_csv_path = 'test.csv'
+
+# Define the path to the model and its weights
 modelPath = 'Model/cnn12_model.h5'
 modelWeights = 'Model/trainWeights.h5'
-# Image Dimension
+
+# Define the image dimension (assumed to be square)
 imgDim = 128
+
+# Define key codes for some keyboard keys
 key_codes = {}
 key_codes[('t', 'Darwin')] = 285212788
 key_codes[('t', 'Windows')] = 84
@@ -65,5 +72,5 @@ key_codes[('Right', 'Windows')] = 39
 key_codes[('Down', 'Darwin')] = 2097215233
 key_codes[('Down', 'Windows')] = 40
 
-
+# Define the font used for the text on the images
 font = ImageFont.truetype(font='fonts/arial.ttf', size=32)

@@ -37,7 +37,7 @@ dataColor = (0, 255, 0)
 pred = ''
 prevPred = ''
 sentence = ""
-default_sample_rate = 9
+default_sample_rate = 6
 count = default_sample_rate
 threshold = 0.8  # the threshold for the prediction  Between 0 and 1
 isOn = False
@@ -229,7 +229,6 @@ class App:
                 self.vid.testMode = False
                 test_df.to_csv('test.csv', index=False)
                 self.vid.predict = False
-                print_csv_to_console()
             else:
                 self.vid.testMode = True
                 self.vid.predict = True
@@ -281,7 +280,7 @@ class VideoFrame:
 
             # take data or apply predictions on ROI
             if self.predict:
-                loop = asyncio.get_event_loop() 
+                loop = asyncio.get_event_loop()
                 loop.run_until_complete(
                     predictImg(roi, test_mode=self.testMode))
 
@@ -322,96 +321,101 @@ class VideoFrame:
             self.vid.release()
 
 
-def print_csv_to_console():
-    print_df = pd.read_csv('test.csv')
-    print(print_df)
-
-
-def write_to_csv(prediction, rightprediction):
-    global test_df
-    current_time = datetime.datetime.now()
-    new_row = {'prediction': prediction,
-               'right_prediction': rightprediction, 'time': current_time}
-    test_df = pd.concat([test_df, pd.DataFrame(
-        new_row, index=[0])], ignore_index=True)
-    return test_df
-
-
 def show_popup(roi):
+    """
+    Display a popup window with an image and buttons to confirm or correct a prediction.
+
+    Args:
+        roi (str): The path to the image to display in the popup.
+
+    Returns:
+        None
+    """
     global isOn
     global count1
     global TestInput
 
+    # Define a function to execute when the "prediction right" button is clicked
     def on_yes_click():
         global isOn
         global test_df
         global count1
+
+        # Write the prediction and user's choice to a CSV file
         write_to_csv(pred, pred)
-        isOn = False
         write_to_csv(pred, variable.get())
+
+        # Save a copy of the image with a unique filename
         now = datetime.datetime.now()
         value = hebrew_to_english[pred]
         img = cv2.imread(roi)
-        path = "TempImages/{0}/{0}_{1}_".format(
-            value, count1) + now.strftime("%d-%m-%Y-%H-%M-%S")+".png"
-        print(path)
+        path = f"TempImages/{value}/{value}_{count1}_" + now.strftime("%d-%m-%Y-%H-%M-%S") + ".png"
         cv2.imwrite(path, img)
+
+        # Increment the counter and close the popup window
         count1 += 1
+        isOn = False
         TestInput.destroy()
 
+    # Define a function to execute when the "prediction wrong" button is clicked
     def on_no_click():
         global isOn
         global count1
         global test_df
-        isOn = False
+
+        # Save a copy of the image with a unique filename
         value = hebrew_to_english[variable.get()]
         img = cv2.imread(roi)
         now = datetime.datetime.now()
-        path = "TempImages/{0}/{0}_{1}_".format(
-            value, count1) + now.strftime("%d-%m-%Y-%H-%M-%S")+".png"
-        print(path)
+        path = f"TempImages/{value}/{value}_{count1}_" + now.strftime("%d-%m-%Y-%H-%M-%S") + ".png"
         cv2.imwrite(path, img)
-        count1 += 1
+
+        # Write the prediction and user's choice to a CSV file
         write_to_csv(pred, variable.get())
+
+        # Increment the counter and close the popup window
+        count1 += 1
+        isOn = False
         TestInput.destroy()
 
+    # Only display the popup if it's not already open
     if isOn == False:
         isOn = True
         TestInput = tkinter.Toplevel()
         TestInput.geometry("350x700")
         TestInput.title("Popup")
-        # Create a photoimage object of the image in the path
+
+        # Load the image and create a Tkinter PhotoImage object
         current_roi = Image.open(roi)
         current_roi_tk = ImageTk.PhotoImage(current_roi)
+
+        # Create a Tkinter label to display the image and position it
         img_component = tkinter.Label(TestInput, image=current_roi_tk)
         img_component.image = current_roi_tk
-
-        # Position image
         img_component.place(x=75, y=200)
-        label = tkinter.Label(
-            TestInput, text="current prediction is: %s\nchoose the right letter if prediction is wrong " % pred)
-        label.pack()
 
+        # Create a label and option menu for selecting the correct letter
+        label = tkinter.Label(TestInput, text=f"Current prediction is: {pred}\nChoose the right letter if prediction is wrong")
+        label.pack()
         variable = tkinter.StringVar(TestInput, alphaBet[0])
-        option_menu = tkinter.OptionMenu(
-            TestInput, variable, *hebrew_to_english.keys())
+        option_menu = tkinter.OptionMenu(TestInput, variable, *hebrew_to_english.keys())
         option_menu.pack()
 
+        # Create buttons to confirm or correct the prediction
         button_frame = tkinter.Frame(TestInput)
         button_frame.pack()
-        Righr_button = tkinter.Button(
-            button_frame, text="prediction Right", command=on_yes_click)
+        Righr_button = tkinter.Button(button_frame, text="Prediction Right", command=on_yes_click)
         Righr_button.pack()
-
-        wrong_button = tkinter.Button(
-            button_frame, text="prediction Wrong", command=on_no_click)
+        wrong_button = tkinter.Button(button_frame, text="Prediction Wrong", command=on_no_click)
         wrong_button.pack()
 
+        # Configure the window to close if the user tries to close it
         TestInput.protocol("WM_DELETE_WINDOW", on_no_click)
 
-        TestInput.grab_set()  # disable other windows while the popup is open
-        TestInput.wait_window()  # wait for the popup window to be destroyed
+        # Disable other windows while the popup is open
+        TestInput.grab_set()
 
-
+        # Wait for the popup window to be destroyed
+        TestInput.wait_window() 
 # Create a window and pass it to the Application object
 App(Tk(), "Sign Language Letters Recognition")
