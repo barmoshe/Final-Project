@@ -47,6 +47,37 @@ test_df = pd.read_csv(test_csv_path)
 sentence = ''
 
 
+def write_to_csv(prediction, rightprediction):
+    """
+    Write a new row to a global pandas DataFrame and return it.
+
+    Parameters:
+    prediction (str): the predicted value.
+    rightprediction (str): the actual value.
+
+    Returns:
+    test_df (pandas.DataFrame): the updated DataFrame.
+    """
+    global test_df
+
+    # Get the current time
+    current_time = datetime.datetime.now()
+
+    # Create a new dictionary with the row data
+    new_row = {
+        'prediction': prediction,
+        'right_prediction': rightprediction,
+        'time': current_time
+    }
+
+    # Add the new row to the DataFrame and reset the index
+    test_df = pd.concat([test_df, pd.DataFrame(
+        new_row, index=[0])], ignore_index=True)
+
+    # Return the updated DataFrame
+    return test_df
+
+
 async def predictImg(roi, test_mode=False):
     """
     Asynchronously prediction.
@@ -146,7 +177,7 @@ class App:
 
         # adding buttons
         image = Image.open("icons/save.png")
-        image = image.resize((20, 20), Image.LANCZOS)
+        image = image.resize((50, 50), Image.LANCZOS)
         img = ImageTk.PhotoImage(image)
         self.save_but = tkinter.Button(window, text="save text", width=50, height=50, image=img,
                                        command=self.click_on_save)
@@ -343,13 +374,14 @@ def show_popup(roi):
 
         # Write the prediction and user's choice to a CSV file
         write_to_csv(pred, pred)
-        write_to_csv(pred, variable.get())
+        # write_to_csv(pred, variable.get())
 
         # Save a copy of the image with a unique filename
         now = datetime.datetime.now()
         value = hebrew_to_english[pred]
         img = cv2.imread(roi)
-        path = f"TempImages/{value}/{value}_{count1}_" + now.strftime("%d-%m-%Y-%H-%M-%S") + ".png"
+        path = f"TempImages/{value}/{value}_{count1}_" + \
+            now.strftime("%d-%m-%Y-%H-%M-%S") + ".png"
         cv2.imwrite(path, img)
 
         # Increment the counter and close the popup window
@@ -367,7 +399,8 @@ def show_popup(roi):
         value = hebrew_to_english[variable.get()]
         img = cv2.imread(roi)
         now = datetime.datetime.now()
-        path = f"TempImages/{value}/{value}_{count1}_" + now.strftime("%d-%m-%Y-%H-%M-%S") + ".png"
+        path = f"TempImages/{value}/{value}_{count1}_" + \
+            now.strftime("%d-%m-%Y-%H-%M-%S") + ".png"
         cv2.imwrite(path, img)
 
         # Write the prediction and user's choice to a CSV file
@@ -395,18 +428,22 @@ def show_popup(roi):
         img_component.place(x=75, y=200)
 
         # Create a label and option menu for selecting the correct letter
-        label = tkinter.Label(TestInput, text=f"Current prediction is: {pred}\nChoose the right letter if prediction is wrong")
+        label = tkinter.Label(
+            TestInput, text=f"Current prediction is: {pred}\nChoose the right letter if prediction is wrong")
         label.pack()
         variable = tkinter.StringVar(TestInput, alphaBet[0])
-        option_menu = tkinter.OptionMenu(TestInput, variable, *hebrew_to_english.keys())
+        option_menu = tkinter.OptionMenu(
+            TestInput, variable, *hebrew_to_english.keys())
         option_menu.pack()
 
         # Create buttons to confirm or correct the prediction
         button_frame = tkinter.Frame(TestInput)
         button_frame.pack()
-        Righr_button = tkinter.Button(button_frame, text="Prediction Right", command=on_yes_click)
+        Righr_button = tkinter.Button(
+            button_frame, text="Prediction Right", command=on_yes_click)
         Righr_button.pack()
-        wrong_button = tkinter.Button(button_frame, text="Prediction Wrong", command=on_no_click)
+        wrong_button = tkinter.Button(
+            button_frame, text="Prediction Wrong", command=on_no_click)
         wrong_button.pack()
 
         # Configure the window to close if the user tries to close it
@@ -416,6 +453,8 @@ def show_popup(roi):
         TestInput.grab_set()
 
         # Wait for the popup window to be destroyed
-        TestInput.wait_window() 
+        TestInput.wait_window()
+
+
 # Create a window and pass it to the Application object
 App(Tk(), "Sign Language Letters Recognition")

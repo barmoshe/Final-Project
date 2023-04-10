@@ -5,6 +5,8 @@ import glob
 import os
 import random
 from globals import alphaBet
+import datetime  # For working with dates and times
+
 
 
 def print_csv_to_console():
@@ -139,32 +141,3 @@ def print_csv_to_console():
     print(print_df)
 
 
-def write_to_csv(prediction, rightprediction):
-    """
-    Write a new row to a global pandas DataFrame and return it.
-
-    Parameters:
-    prediction (str): the predicted value.
-    rightprediction (str): the actual value.
-
-    Returns:
-    test_df (pandas.DataFrame): the updated DataFrame.
-    """
-    global test_df
-
-    # Get the current time
-    current_time = datetime.datetime.now()
-
-    # Create a new dictionary with the row data
-    new_row = {
-        'prediction': prediction,
-        'right_prediction': rightprediction,
-        'time': current_time
-    }
-
-    # Add the new row to the DataFrame and reset the index
-    test_df = pd.concat([test_df, pd.DataFrame(
-        new_row, index=[0])], ignore_index=True)
-
-    # Return the updated DataFrame
-    return test_df
