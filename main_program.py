@@ -31,6 +31,7 @@ import datetime  # For working with dates and times
 import pandas as pd  # For working with data in a table format
 global text_file_num, e1, sample_rate, glob_root
 
+
 model = load_model(modelPath)
 model.load_weights(modelWeights)
 dataColor = (0, 255, 0)
@@ -39,7 +40,7 @@ prevPred = ''
 sentence = ""
 default_sample_rate = 6
 count = default_sample_rate
-threshold = 0.8  # the threshold for the prediction  Between 0 and 1
+threshold = 0.7  # the threshold for the prediction  Between 0 and 1
 isOn = False
 current_selection = None
 count1 = 0
@@ -125,7 +126,7 @@ async def predictImg(roi, test_mode=False):
                 cv2.imwrite("lastRoi.jpg", cv2.cvtColor(
                     roi, cv2.COLOR_RGB2BGR))
                 if isOn == False:
-                    show_popup("lastRoi.jpg")
+                    show_test_popup("lastRoi.jpg")
             else:
                 if pred == 'del':
                     sentence = sentence[:-1]
@@ -203,23 +204,6 @@ class App:
         self.update()
         self.window.mainloop()
 
-    def click_on_save(self):
-        global textForm, text_file_num
-        f = filedialog.asksaveasfile(mode='w', defaultextension=".txt")
-        if f is None:  # asksaveasfile return `None` if dialog closed with "cancel".
-            return
-        data = textForm.get()
-        data.encode(encoding="UTF-8", errors='strict')
-        f.write(data)
-        f.close()
-
-    def clear_txt_box(self):
-        global textForm
-        textForm.config(state=NORMAL)
-        textForm.delete(0, END)
-        textForm.config(state=DISABLED)
-        sentence = ''
-
     def exit_prog(self):
         self.window.destroy()
 
@@ -233,6 +217,23 @@ class App:
             self.canvas.create_image(0, 0, image=self.photo, anchor=tkinter.NW)
 
         self.window.after(self.delay, self.update)
+
+    def click_on_save(self):
+        global textForm, text_file_num
+        f = filedialog.asksaveasfile(mode='w', defaultextension=".txt")
+        if f is None:  # asksaveasfile return `None` if dialog closed with "cancel".
+            return
+        data = textForm.get()
+        data.encode(encoding="UTF-8", errors='strict')
+        f.write(data)
+        f.close()
+
+    def clear_txt_box(self):
+        global textForm, sentence
+        textForm.config(state=NORMAL)
+        textForm.delete(0, END)
+        textForm.config(state=DISABLED)
+        sentence = ''
 
     def keyPressed(self, event):
         global test_df
@@ -331,8 +332,12 @@ class VideoFrame:
             # Add Letter prediction
             img_pil = Image.fromarray(frame)
             draw = ImageDraw.Draw(img_pil)
-            draw.text((self.fx, self.fy + self.fh), "Prediction: %s" %
-                      pred, font=font, fill=dataColor)
+            if pred == ' ':
+                draw.text((self.fx, self.fy+ self.fh), "Prediction: Space",
+                          font=font, fill=dataColor)
+            else:
+                draw.text((self.fx, self.fy + self.fh), "Prediction: %s" %
+                          pred, font=font, fill=dataColor)
             draw.text((self.fx, self.fy + 380), 'Sample Timer: %d ' %
                       count, font=font, fill=dataColor)
             # noinspection PyAttributeOutsideInit
@@ -352,7 +357,7 @@ class VideoFrame:
             self.vid.release()
 
 
-def show_popup(roi):
+def show_test_popup(roi):
     """
     Display a popup window with an image and buttons to confirm or correct a prediction.
 
@@ -365,20 +370,24 @@ def show_popup(roi):
     global isOn
     global count1
     global TestInput
-
+    global pred
+    local_pred = pred
+    if local_pred == ' ' or local_pred == '':
+        local_pred = 'space'
     # Define a function to execute when the "prediction right" button is clicked
+
     def on_yes_click():
         global isOn
         global test_df
         global count1
 
         # Write the prediction and user's choice to a CSV file
-        write_to_csv(pred, pred)
+        write_to_csv(local_pred, local_pred)
         # write_to_csv(pred, variable.get())
 
         # Save a copy of the image with a unique filename
         now = datetime.datetime.now()
-        value = hebrew_to_english[pred]
+        value = hebrew_to_english[local_pred]
         img = cv2.imread(roi)
         path = f"TempImages/{value}/{value}_{count1}_" + \
             now.strftime("%d-%m-%Y-%H-%M-%S") + ".png"
@@ -404,7 +413,7 @@ def show_popup(roi):
         cv2.imwrite(path, img)
 
         # Write the prediction and user's choice to a CSV file
-        write_to_csv(pred, variable.get())
+        write_to_csv(local_pred, variable.get())
 
         # Increment the counter and close the popup window
         count1 += 1
@@ -429,7 +438,7 @@ def show_popup(roi):
 
         # Create a label and option menu for selecting the correct letter
         label = tkinter.Label(
-            TestInput, text=f"Current prediction is: {pred}\nChoose the right letter if prediction is wrong")
+            TestInput, text=f"Current prediction is: {local_pred}\nChoose the right letter if prediction is wrong")
         label.pack()
         variable = tkinter.StringVar(TestInput, alphaBet[0])
         option_menu = tkinter.OptionMenu(
