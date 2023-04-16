@@ -40,7 +40,7 @@ prevPred = ''
 sentence = ""
 default_sample_rate = 6
 count = default_sample_rate
-threshold = 0.7  # the threshold for the prediction  Between 0 and 1
+threshold = 0.8  # the threshold for the prediction  Between 0 and 1
 isOn = False
 current_selection = None
 count1 = 0
@@ -268,7 +268,7 @@ class App:
 
 
 class VideoFrame:
-    def __init__(self, video_source=0):
+    def __init__(self, video_source=1):
         self.testMode = False
 
         # Open the video source
@@ -333,7 +333,7 @@ class VideoFrame:
             img_pil = Image.fromarray(frame)
             draw = ImageDraw.Draw(img_pil)
             if pred == ' ':
-                draw.text((self.fx, self.fy+ self.fh), "Prediction: Space",
+                draw.text((self.fx, self.fy + self.fh), "Prediction: Space",
                           font=font, fill=dataColor)
             else:
                 draw.text((self.fx, self.fy + self.fh), "Prediction: %s" %
@@ -467,3 +467,4 @@ def show_test_popup(roi):
 
 # Create a window and pass it to the Application object
 App(Tk(), "Sign Language Letters Recognition")
+
